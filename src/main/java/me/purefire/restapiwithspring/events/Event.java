@@ -2,6 +2,7 @@ package me.purefire.restapiwithspring.events;
 
 import lombok.*;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 //@Builder 는 모든 변수가진 생성자, 공개범위 default
@@ -12,8 +13,10 @@ import java.time.LocalDateTime;
 //
 @Builder @AllArgsConstructor @NoArgsConstructor
 @Getter @Setter @EqualsAndHashCode(of = "id")
+@Entity
 public class Event {
 
+    @Id @GeneratedValue
     private Integer id;
     private String name;
     private String description;
@@ -27,5 +30,6 @@ public class Event {
     private int limitOfEnrollment;
     private boolean offline;
     private boolean free;
+    @Enumerated(EnumType.STRING) //default EnumType.ORDINAL enum에 0,1,2 순서대로 숫자부여
     private EventStatus eventStatus;
 }
