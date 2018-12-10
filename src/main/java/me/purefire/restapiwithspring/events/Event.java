@@ -31,5 +31,5 @@ public class Event {
     private boolean offline;
     private boolean free;
     @Enumerated(EnumType.STRING) //default EnumType.ORDINAL enum에 0,1,2 순서대로 숫자부여
-    private EventStatus eventStatus;
+    private EventStatus eventStatus = EventStatus.DRAFT; //default Draft setting
 }

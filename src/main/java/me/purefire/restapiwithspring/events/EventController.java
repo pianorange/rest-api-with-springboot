@@ -1,5 +1,6 @@
 package me.purefire.restapiwithspring.events;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @Controller
 @RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
@@ -26,13 +26,25 @@ public class EventController {
     // 2. 생성자(since Spring4.3)
     // 생성자가 한개고 받아올 파라메터가 이미 bean 등록 되어있다면 autowired 필요 없음
     private final EventRepository eventRepository;
+    private final ModelMapper modelMapper;
 
-    public EventController(EventRepository eventRepository) {
+    public EventController(EventRepository eventRepository, ModelMapper modelMapper) {
         this.eventRepository = eventRepository;
+        this.modelMapper = modelMapper;
     }
 
+
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody Event event) {
+    public ResponseEntity createEvent(@RequestBody EventDto eventDto) {
+
+        /*
+        Event event = Event.builder()
+            .name(eventDto.getName())
+            .description(eventDto.getDescription())
+            .build();
+        */
+        // 代わりにModelMapper使えるが、JavaReflection使うので性能を考慮した場合、上記の方法がまし
+        Event event = modelMapper.map(eventDto, Event.class);
 
         Event newEvent = this.eventRepository.save(event);
 
