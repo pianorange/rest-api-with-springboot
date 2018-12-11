@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EventControllerTests_SpringRunner {
+public class EventControllerTests_SpringBootTest {
 
     //@SpringBootTest 디폴트 변수중 webEnvironment() default SpringBootTest.WebEnvironment.MOCK;
     //가지고있기 때문에 Mocking을 한 dispatcherServlet생성되도록 설정되있으므로
@@ -39,9 +39,7 @@ public class EventControllerTests_SpringRunner {
     @Test
     public void createEvent() throws Exception {
 
-        Integer reqId = 20;
-        Event event = Event.builder()
-                .id(reqId)
+        EventDto event = EventDto.builder()
                 .name("Spring")
                 .description("REST API Development")
                 .beginEnrollmentDateTime(LocalDateTime.of(2018,11,11,12,10))
@@ -50,10 +48,8 @@ public class EventControllerTests_SpringRunner {
                 .endEventDateTime(LocalDateTime.of(2018,11,11,12,10))
                 .basePrice(100)
                 .maxPrice(200)
-                .free(true)
                 .limitOfEnrollment(100)
                 .location("tokyo sibuya")
-                .eventStatus(EventStatus.PUBLISHED)
                 .build();
 
         System.out.printf(objectMapper.writeValueAsString(event));
@@ -69,9 +65,51 @@ public class EventControllerTests_SpringRunner {
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE,"application/hal+json;charset=UTF-8"))
                 .andExpect(jsonPath("free").value(Matchers.not(true)))//処理に必要なparameter 以外は無視しているか
-                .andExpect(jsonPath("id").value(Matchers.not(reqId)));//処理に必要なparameter 以外は無視しているか
+                .andExpect(jsonPath("id").value(Matchers.not("20")));//処理に必要なparameter 以外は無視しているか
     }
 
+    /**
+     * SpringBoot properties 파일 이용 ObjectMapper 확장
+     * 원치 않는 값이 포함된 리퀘스트가 오면 Bad Request를 Response
+     *
+     * BedRequest vs 받기로 한 값 이외에는 무시(필요한 항목만 가진 BeanClass만들어서서
+     *
+     * deserialization할때 알려지지 않은 프로퍼티가 넘어오면 실패하라
+     * spring.jackson.deserialization.fail-on-unknown-properties=true
+     * json to Object  -> deserialization
+     * Object to json -> serialization
+     * 반대로 serialization시 설정도 있음.
+     * spring.jackson.serialization.fail-on-empty-beans=
+     * @throws Exception
+     */
+    @Test
+    public void createEvent_Bad_Request() throws Exception {
+
+        Event event = Event.builder()
+                .id(20)
+                .name("Spring")
+                .description("REST API Development")
+                .beginEnrollmentDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018,11,11,14,10))
+                .beginEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .endEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .basePrice(100)
+                .maxPrice(200)
+                .free(true)
+                .limitOfEnrollment(100)
+                .location("tokyo sibuya")
+                .build();
+
+        System.out.printf(objectMapper.writeValueAsString(event));
+
+        mockMvc.perform(post("/api/events/")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(event))
+        )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
 
 }
 
