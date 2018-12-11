@@ -5,9 +5,9 @@ study rest api with springboot
 _ _ _
 
 
-資源(RESOURCE) - URI
-行為(Verb) - HTTP METHOD
-表現(Representations)
+資源(RESOURCE) - URI <br>
+行為(Verb) - HTTP METHOD <br>
+表現(Representations) <br>
 
 ###### REST の特徴
 _ _ _
