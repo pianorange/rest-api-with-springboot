@@ -1,5 +1,6 @@
 package me.purefire.restapiwithspring.events;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class EventControllerTests_SpringBootTest {
      * SpringBoot properties 파일 이용 ObjectMapper 확장
      * 원치 않는 값이 포함된 리퀘스트가 오면 Bad Request를 Response
      *
-     * BedRequest vs 받기로 한 값 이외에는 무시(필요한 항목만 가진 BeanClass만들어서서
+     * BedRequest vs 받기로 한 값 이외에는 무시(필요한 항목만 가진 BeanClass만들어서
      *
      * deserialization할때 알려지지 않은 프로퍼티가 넘어오면 실패하라
      * spring.jackson.deserialization.fail-on-unknown-properties=true
@@ -80,7 +81,7 @@ public class EventControllerTests_SpringBootTest {
      * Object to json -> serialization
      * 반대로 serialization시 설정도 있음.
      * spring.jackson.serialization.fail-on-empty-beans=
-     * @throws Exception
+     * @throws Exception perform 예외
      */
     @Test
     public void createEvent_Bad_Request() throws Exception {
@@ -109,6 +110,35 @@ public class EventControllerTests_SpringBootTest {
         )
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * BindingResult는 항상 어노테이션Valid 바로 다음 인자로 사용(스프링 MVC)
+     * Bean에 값들을 바인딩시 Valid는 Js303이용 값 검증 가능
+     * 어노테이션 NotNull, NotEmpty, Min, Max ... 사용 입력값 바인딩할 때 에러 확인 가능
+     *
+     * 도메인 Validator 만들기
+     * Validator 인터페이스 사용하기 (없이 만들어도 상관없음)
+     *
+     * 테스트 설명 용 어노테이션 만들기
+     * Target, Retention
+     *
+     * 테스트 할 것
+     *   입력값이 이상한 경우 에러
+     *   비즈니스 로직으로 검사할 수 있는 에러
+     *   에러 응답 메시지에 에러에 대한 정보가 담겨있어야 한다.
+     *
+     * @throws Exception perform 예외
+     */
+    @Test
+    public void createEvent_Bad_Request_Empty_Input() throws Exception {
+        EventDto eventDto = EventDto.builder().build();
+
+        this.mockMvc.perform(post("/api/events")
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .content(this.objectMapper.writeValueAsString(eventDto))
+        )
+                    .andExpect(status().isBadRequest());
     }
 
 }
