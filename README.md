@@ -19,7 +19,7 @@ Uniform InterfaceはURIに指定したリソースに対した操作を統一さ
 RESTは状態を持たない。つまり、作業のための状態情報を設定して管理しない。 Session情報またはCookie情報を別途に設定して管理しないためAPIサーバは外から受け入れたRequestだけを処理すればいい。そのため、サービスの自由度が高まってサーバで不要な情報を管理しないことによって具現が単純になる。
 
 3. Cacheable
-RESTの主な特徴はHTTPをそのまま使うため、ウェブで使われる既存のインフラがそのまま活用できる。それによってHTTPがもったCaching機能が適用できる。HTTPプロトコルで使われる [Last-Modified](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Last-Modified)タグまたは[E-Tag](https:/developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=ko)を使うことでCachingができる。
+RESTの主な特徴はHTTPをそのまま使うため、ウェブで使われる既存のインフラがそのまま活用できる。それによってHTTPがもったCaching機能が適用できる。HTTPプロトコルで使われる [Last-Modified](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Last-Modified)タグまたは[E-Tag](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=ko)を使うことでCachingができる。
 
 4. Self-descriptiveness
 REST API メッセージだけを見ても理解できる。
