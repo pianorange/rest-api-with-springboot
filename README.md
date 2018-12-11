@@ -1,7 +1,7 @@
 # rest-api-with-springboot
 study rest api with springboot
 
-######REST 構成
+###### REST 構成
 _ _ _
 
 
@@ -9,7 +9,7 @@ _ _ _
 行為(Verb) - HTTP METHOD
 表現(Representations)
 
-######REST の特徴
+###### REST の特徴
 _ _ _
 
 1. Uniform (uniform interface)
