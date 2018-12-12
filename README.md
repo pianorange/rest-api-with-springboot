@@ -39,7 +39,8 @@ ___
 <b> ２．リソースに対した行為は HTTP Method(GET, POST, PUT, DELETE)で表現する。　</b><br>
 
 
-4-1. REST API設計規則
+REST API設計規則
+___
 1) URIは情報のリソースを表現するべき。（リソース名は動詞より名詞を使う）
     GET /members/delete/1
 上記のような方式はRESTらしくない URI。 URIはリソースを表現するべきなのでdeleteみたいな行為に関した表現が含まれてはいけない。
@@ -61,7 +62,9 @@ ___
     GET /members/insert/2 (x)  - GET メソッドはリソース生成に使わない。
     POST /members/2       (o)
 
+
 [参考]HTTP METHODの役割
+___
 POST, GET, PUT, DELETE この四つのMethodを持ってCRUDが表現できる。
 
 - POST	: POSTを通じて該当URIにRequestするとリソースを生成する。
