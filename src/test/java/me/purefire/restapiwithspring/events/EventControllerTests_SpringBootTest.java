@@ -2,6 +2,7 @@ package me.purefire.restapiwithspring.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.purefire.restapiwithspring.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,16 +39,17 @@ public class EventControllerTests_SpringBootTest {
     ObjectMapper objectMapper;
 
     @Test
+    @TestDescription("정상적인 테스트")
     public void createEvent() throws Exception {
 
         EventDto event = EventDto.builder()
                 .name("Spring")
                 .description("REST API Development")
-                .beginEnrollmentDateTime(LocalDateTime.of(2018,11,11,12,10))
-                .closeEnrollmentDateTime(LocalDateTime.of(2018,11,11,14,10))
+                .beginEnrollmentDateTime(LocalDateTime.of(2018,11,10,12,10))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018,11,10,14,10))
                 .beginEventDateTime(LocalDateTime.of(2018,11,11,12,10))
                 .endEventDateTime(LocalDateTime.of(2018,11,11,12,10))
-                .basePrice(100)
+                .basePrice(1000)
                 .maxPrice(200)
                 .limitOfEnrollment(100)
                 .location("tokyo sibuya")
@@ -84,6 +86,7 @@ public class EventControllerTests_SpringBootTest {
      * @throws Exception perform 예외
      */
     @Test
+    @TestDescription("입력 받을 수 없는 값을 사용한 경우에 에러 발생하는 테스트")
     public void createEvent_Bad_Request() throws Exception {
 
         Event event = Event.builder()
@@ -131,6 +134,7 @@ public class EventControllerTests_SpringBootTest {
      * @throws Exception perform 예외
      */
     @Test
+    @TestDescription("입력값이 비어있는 경우에 에러 발생하는 테스트")
     public void createEvent_Bad_Request_Empty_Input() throws Exception {
         EventDto eventDto = EventDto.builder().build();
 
@@ -149,6 +153,7 @@ public class EventControllerTests_SpringBootTest {
      * @throws Exception perform 예외
      */
     @Test
+    @TestDescription("입력값이 잘못된 이벤트")
     public void createEvent_Bad_Request_Wrong_Input() throws Exception {
 
         EventDto eventDto = EventDto.builder()
