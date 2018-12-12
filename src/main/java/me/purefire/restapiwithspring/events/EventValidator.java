@@ -15,6 +15,7 @@ public class EventValidator {
             //Register a field error for the specified field of the current object
             errors.rejectValue("basePrice", "wrongValue","BasePrice is Wrong");
             errors.rejectValue("maxPrice", "wrongValue","MaxPrice is Wrong");
+            errors.reject("wrongPrices","values of prices are Wrong");
         }
 
         //before > after Date Check

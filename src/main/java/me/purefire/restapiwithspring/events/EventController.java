@@ -41,13 +41,16 @@ public class EventController {
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
         //@Valid 어노테이션은 값 바인딩시 검증수행하고 문재있는경우 Errors 변수에 파라메터를 보내준다
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            // body(errors) - > json return   X ( 그래서 ErrorsSerializer class 추가)
+            //event는 JavaBeanSpec 준수 -> ObjectMapper사용　BeanSerializer 사용해서 Json변환
+            //errors는 별도 ErrorsSerializer 구현 필요
+            return ResponseEntity.badRequest().body(errors);
         }
 
         eventValidator.validate(eventDto, errors);
 
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
 
         /*
@@ -63,6 +66,8 @@ public class EventController {
 
         //location URI 생성위해 HATEOS가 제공하는 메소드사용
         URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
+
+        // body(event) - > json return
         return ResponseEntity.created(createdUri).body(event);
     }
 
