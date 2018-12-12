@@ -114,7 +114,7 @@ public class EventControllerTests_SpringBootTest {
 
     /**
      * BindingResult는 항상 어노테이션Valid 바로 다음 인자로 사용(스프링 MVC)
-     * Bean에 값들을 바인딩시 Valid는 Js303이용 값 검증 가능
+     * Bean에 값들을 바인딩시 Valid는 JS303이용 값 검증 가능
      * 어노테이션 NotNull, NotEmpty, Min, Max ... 사용 입력값 바인딩할 때 에러 확인 가능
      *
      * 도메인 Validator 만들기
@@ -139,6 +139,39 @@ public class EventControllerTests_SpringBootTest {
                     .content(this.objectMapper.writeValueAsString(eventDto))
         )
                     .andExpect(status().isBadRequest());
+    }
+
+    /**
+     *カスタムValidatorを使ったバリデーション
+     * 前後チェック
+     * Min Max チェック
+     *
+     * @throws Exception perform 예외
+     */
+    @Test
+    public void createEvent_Bad_Request_Wrong_Input() throws Exception {
+
+        EventDto eventDto = EventDto.builder()
+                .name("Spring")
+                .description("REST API Development")
+                //StartDate > EndDate
+                .beginEnrollmentDateTime(LocalDateTime.of(2018,11,12,12,10))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018,11,11,14,10))
+                .beginEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .endEventDateTime(LocalDateTime.of(2018,11,12,12,10))
+                //basePrice > MaxPrice
+                .basePrice(1000)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("tokyo sibuya")
+                .build();
+
+        //
+        this.mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(eventDto))
+        )
+                .andExpect(status().isBadRequest());
     }
 
 }
