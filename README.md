@@ -30,16 +30,16 @@ REST サーバは API 提供、クライアントはユーザー認証やコン�
 6. 階層型構造
 REST サーバは多重階層で構成されることができてセキュリティ、ロードバランシング、暗号化階層を追加し構造を柔軟に管理することができるとともにPROXY、GateWayみたいなネットワーク基盤の中間媒体が使えるようにします。
 
-###### REST API デザインガイド
+#######　REST API デザインガイド
 ___
 
 <b> REST API 設計ポイント二つ </b><br>
 
-<b> １．URIは情報のリソースを表現するべき</b> <br>
-<b> ２．リソースに対した行為は HTTP Method(GET, POST, PUT, DELETE)で表現する。　</b><br>
+１．URIは情報のリソースを表現するべき <br>
+２．リソースに対した行為は HTTP Method(GET, POST, PUT, DELETE)で表現する。　<br>
 
 
-REST API設計規則
+<b> REST API設計規則 </b>
 ___
 1) URIは情報のリソースを表現するべき。（リソース名は動詞より名詞を使う）
     GET /members/delete/1
@@ -52,18 +52,17 @@ ___
 
 会員情報を持ってくるときには GET, 会員を追加する行為を表現したい場合は、POST METHODを使って表現する。
 
-<b> 会員情報を持ってくる URI </b>
+会員情報を持ってくる URI
 
     GET /members/show/1     (x)
     GET /members/1          (o)
 
-<b> 会員を追加する時 </b>
+会員を追加する時
 
     GET /members/insert/2 (x)  - GET メソッドはリソース生成に使わない。
     POST /members/2       (o)
 
-
-[参考]HTTP METHODの役割
+<b> [参考]HTTP METHODの役割</b>
 ___
 POST, GET, PUT, DELETE この四つのMethodを持ってCRUDが表現できる。
 
