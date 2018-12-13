@@ -4,11 +4,11 @@ study rest api with springboot
 Springで提供されている色んな機能を使ってSelf-Describtive MessageとHATEOAS(Hypermedia as the engine of application state)を
 満たせるRESTAPIを作る。 
 
-● Spring Boot
-● Spring Data JPA 
-● Spring HATEOAS 
-● Spring REST Docs 
-● Spring Security OAuth
+- Spring Boot 
+- Spring Data JPA 
+- Spring HATEOAS 
+- Spring REST Docs 
+- Spring Security OAuth
 
 
 
