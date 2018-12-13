@@ -61,7 +61,8 @@ public class EventController {
         */
         // 代わりにModelMapper使えるが、JavaReflection使うので性能を考慮した場合、上記の方法がまし
         Event event = modelMapper.map(eventDto, Event.class);
-
+       //ReqParameterに渡された値を基準にしてFree項目を設定
+        event.update();
         Event newEvent = this.eventRepository.save(event);
 
         //location URI 생성위해 HATEOS가 제공하는 메소드사용

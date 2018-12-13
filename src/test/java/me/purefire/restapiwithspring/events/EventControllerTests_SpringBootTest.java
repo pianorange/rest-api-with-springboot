@@ -182,5 +182,38 @@ public class EventControllerTests_SpringBootTest {
                 .andExpect(jsonPath("$[0].code").exists());
     }
 
+    @Test
+    @TestDescription("정상적인 테스트")
+    public void createEvent_BussinessLogic() throws Exception {
+
+        EventDto event = EventDto.builder()
+                .name("Spring")
+                .description("REST API Development")
+                .beginEnrollmentDateTime(LocalDateTime.of(2018,11,10,12,10))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018,11,10,14,10))
+                .beginEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .endEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .basePrice(10)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("tokyo sibuya")
+                .build();
+
+        System.out.printf(objectMapper.writeValueAsString(event));
+
+        mockMvc.perform(post("/api/events/")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(event))
+        )
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE,"application/hal+json;charset=UTF-8"))
+                .andExpect(jsonPath("free").value(false))//処理に必要なparameter 以外は無視しているか
+                .andExpect(jsonPath("offline").value(true))//処理に必要なparameter 以外は無視しているか
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()));//処理に必要なparameter 以外は無視しているか
+    }
 }
 
