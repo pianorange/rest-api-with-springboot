@@ -1,9 +1,18 @@
 package me.purefire.restapiwithspring.events;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * JUnitParamsRunner
+ * Parameterised tests that don't suck
+ * provides much easier and readable parametrised tests for JUnit >= 4.12.
+ */
+@RunWith(JUnitParamsRunner.class)
 public class EventTest {
 
     //Test 항목 1 생성자를 갖고있는가
@@ -35,37 +44,76 @@ public class EventTest {
     }
 
     @Test
-    public void testFree() {
+    @Parameters({
+            "0, 0, true",
+            "100, 0, false",
+            "0, 100, false"
+    })
+    public void testFree(int basePrice, int maxPrice, boolean isFree) {
 
         // Given
         Event event = Event.builder()
-                    .basePrice(0)
-                    .maxPrice(0)
+                    .basePrice(basePrice)
+                    .maxPrice(maxPrice)
                     .build();
         // When
         event.update();
         // Then
-        assertThat(event.isFree()).isTrue();
+        assertThat(event.isFree()).isEqualTo(isFree);
+    }
+
+    /**
+     * @Parameters使う時、Type安全性確報するために使うメソッド
+     * 使わないでParameter宣言するとjava.lang.RuntimeException: java.lang.Exception: Method testOffLine2 should have no parameters
+     * 使い方
+     * １．@Parameters(method = "paramsForTestFree")
+     * ２．Using convention   parametersFor(target testMethod) <-First Character is UpperCase
+     *  @return params[] paramsForTestFree
+     */
+    private Object[] parametersForTestFreeUsingMethod() {
+        return new Object[] {
+                new Object[] {0, 0, true},
+                new Object[] {100, 0, false},
+                new Object[] {0, 100, false},
+                new Object[] {100, 200, false}
+        };
+    }
+
+    @Test
+    @Parameters(method = "parametersForTestFreeUsingMethod")
+    public void testFreeUsingMethod(int basePrice, int maxPrice, boolean isFree) {
 
         // Given
-        event = Event.builder()
-                .basePrice(100)
-                .maxPrice(0)
+        Event event = Event.builder()
+                .basePrice(basePrice)
+                .maxPrice(maxPrice)
                 .build();
         // When
         event.update();
         // Then
-        assertThat(event.isFree()).isFalse();
+        assertThat(event.isFree()).isEqualTo(isFree);
+    }
+    private Object[] parametersForTestFree2() {
+        return new Object[] {
+                new Object[] {0, 0, true},
+                new Object[] {100, 0, false},
+                new Object[] {0, 100, false},
+                new Object[] {100, 200, false}
+        };
+    }
+    @Test
+    @Parameters
+    public void testFree2(int basePrice, int maxPrice, boolean isFree) {
 
         // Given
-        event = Event.builder()
-                .basePrice(0)
-                .maxPrice(100)
+        Event event = Event.builder()
+                .basePrice(basePrice)
+                .maxPrice(maxPrice)
                 .build();
         // When
         event.update();
         // Then
-        assertThat(event.isFree()).isFalse();
+        assertThat(event.isFree()).isEqualTo(isFree);
     }
 
     @Test
@@ -89,4 +137,23 @@ public class EventTest {
 
     }
 
+    private Object[] parametersForTestOffLine2(){
+        return new Object[] {
+                new Object[] {"Sibuya Tokyo", true},
+                new Object[] {"   ", false}
+        };
+    }
+
+    @Test
+    @Parameters
+    public void testOffLine2(String location, boolean isOffLine) {
+        // Given
+        Event event = Event.builder()
+                .location(location)
+                .build();
+        // When
+        event.update();
+        // Then
+        assertThat(event.isOffline()).isEqualTo(isOffLine);
+    }
 }
