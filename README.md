@@ -84,6 +84,15 @@ POST, GET, PUT, DELETE この四つのMethodを持ってCRUDが表現できる�
 - DELETE: 	DELETEを通じて該当リソースを削除する。
 
 
+##### HATEOAS principle
+
+> Hypermedia As The Engine Of Application State (HATEOAS) is a component of the REST application architecture that distinguishes it 
+> from other network application architectures.
+> https://en.wikipedia.org/wiki/HATEOAS
+
+本アプリではSpring HATEOAS を使ってHATEOASを実現させる。
+
+
 ---
 便利なツール
 JsonParser
