@@ -1,7 +1,9 @@
 package me.purefire.restapiwithspring.events;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -65,11 +67,19 @@ public class EventController {
         event.update();
         Event newEvent = this.eventRepository.save(event);
 
-        //location URI 생성위해 HATEOS가 제공하는 메소드사용
-        URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
+        //Spring HATEOS  linkTo : location URI 생성위해  제공하는 메소드
+        //@RequestMapping(value = "/api/events"의 값을 가져와서 URL 생성
+        ControllerLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
+        URI createdUri = selfLinkBuilder.toUri();
 
         // body(event) - > json return
-        return ResponseEntity.created(createdUri).body(event);
+        EventResource eventResource = new EventResource(event);
+       // eventResource.add(new Link());
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        //Rel に含まれるURLはHTTP　METHODによって動作が決めれられるのでself,update-eventは同じLink
+        eventResource.add(selfLinkBuilder.withSelfRel());
+        eventResource.add(selfLinkBuilder.withRel("update-event"));
+        return ResponseEntity.created(createdUri).body(eventResource);
     }
 
 }

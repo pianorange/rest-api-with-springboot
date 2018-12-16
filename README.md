@@ -90,6 +90,21 @@ POST, GET, PUT, DELETE この四つのMethodを持ってCRUDが表現できる�
 > from other network application architectures.
 > https://en.wikipedia.org/wiki/HATEOAS
 
+- 링크 만드는 기능 
+    - 문자열 가지고 만들기 
+    - 컨트롤러와 메소드로 만들기  <br>
+- 리소스 만드는 기능
+    - 리소스: 데이터 + 링크 <br>
+- 링크 찾아주는 기능 
+    - Traverson
+    - LinkDiscoverers 
+- 링크 
+    - HREF 
+    - REL 
+        - self 자기 자신에 대한 링크를 걸어 줄 때 
+        - profile 이 글의 본문에 대한 링크를 걸어줄 때 
+
+
 本アプリではSpring HATEOAS を使ってHATEOASを実現させる。
 
 
