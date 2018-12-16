@@ -175,7 +175,109 @@ Content-Length: ...
 
 
 ```
+ 
+ @JsonUnwrapped 使用例
+```language
+public class EventResource extends ResourceSupport {
 
+    private Event event;
+    
+    public EventResource(Event evnet) {
+        this.event = evnet;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+```
+今の状態ではEventResourceクラス内でEventオブジェクト、Linksオブジェクトが分けられて表現される。
+```language
+   Body = {
+        "event": {
+            "id": 1,
+                    "name": "Spring",
+                    "description": "REST API Development",
+                    "beginEnrollmentDateTime": "2018-11-10T12:10:00",
+                    "closeEnrollmentDateTime": "2018-11-10T14:10:00",
+                    "beginEventDateTime": "2018-11-11T12:10:00",
+                    "endEventDateTime": "2018-11-11T12:10:00",
+                    "location": "tokyo sibuya",
+                    "basePrice": 10,
+                    "maxPrice": 200,
+                    "limitOfEnrollment": 100,
+                    "offline": true,
+                    "free": false,
+                    "eventStatus": "DRAFT"
+        },
+        "_links": {
+            "query-events": {
+                "href": "http://localhost/api/events"
+            },
+            "self": {
+                "href": "http://localhost/api/events/1"
+            },
+            "update-event": {
+                "href": "http://localhost/api/events/1"
+            }
+        }
+    }
+```
+ @JsonUnwrappedを使うと
+```language
+public class EventResource extends ResourceSupport {
+    @JsonUnwrapped
+    private Event event;
+    
+    public EventResource(Event evnet) {
+        this.event = evnet;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+```
+下記のように、JsonSerializerによってEventBean単位でパーシングされずに＜br＞
+EventBeanの変数を取り出してパーシングする。
+```language
+Body = {
+    "id": 1,
+    "name": "Spring",
+    "description": "REST API Development",
+    "beginEnrollmentDateTime": "2018-11-10T12:10:00",
+    "closeEnrollmentDateTime": "2018-11-10T14:10:00",
+    "beginEventDateTime": "2018-11-11T12:10:00",
+    "endEventDateTime": "2018-11-11T12:10:00",
+    "location": "tokyo sibuya",
+    "basePrice": 10,
+    "maxPrice": 200,
+    "limitOfEnrollment": 100,
+    "offline": true,
+    "free": false,
+    "eventStatus": "DRAFT",
+    "_links": {
+        "query-events": {
+            "href": "http://localhost/api/events"
+        },
+        "self": {
+            "href": "http://localhost/api/events/1"
+        },
+        "update-event": {
+            "href": "http://localhost/api/events/1"
+        }
+    }
+}
+```
+
+※　extends Resource<Event> を使ったて実装しても同じ結果になる
+Resourceの中でパラメータでもらったcontentに@JsonUnwrapped使っているため
+```language
+public class EventResource extends Resource<Event> {
+    
+    public EventResource(Event content, Link... links) {
+        super(content, links);
+    }
+}
+```
 
 
 ---

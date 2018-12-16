@@ -1,21 +1,16 @@
 package me.purefire.restapiwithspring.events;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Resource;
 
-public class EventResource extends ResourceSupport {
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-    @JsonUnwrapped
-    private Event event;
+public class EventResource extends Resource<Event> {
 
-    public EventResource(Event evnet) {
-        this.event = evnet;
+    public EventResource(Event content, Link... links) {
+        super(content, links);
+        //add(new Link("http://localhost:8080/api/events/" + content.getId()));
+        //上記と同じ結果になるが、よりTypeSafe。また、ControllerのMappingPath変わっても修正不要
+        add(linkTo(EventController.class).slash(content.getId()).withSelfRel());
     }
-
-    public Event getEvent() {
-        return event;
-    }
-
-
-
 }
