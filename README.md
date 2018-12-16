@@ -93,7 +93,78 @@ POST, GET, PUT, DELETE この四つのMethodを持ってCRUDが表現できる�
 本アプリではSpring HATEOAS を使ってHATEOASを実現させる。
 
 
+HATEOAS는 RESTful API를 사용하는 클라이언트가 전적으로 서버에 의해 동적으로 상호작용을 할 수 있다. 
+쉽게 말하면 클라이언트가 서버에 요청시 서버는 요청에 의존되는 URI를 Response에 포함시켜 반환한다. 
+
+  예를들면 사용자정보를 입력(POST)하는 요청 후 사용자를 조회(GET), 수정(PUT), 삭제(DELETE)할 수 있는 URI를 동적으로 알려주게 되는 것이다. 이렇게 동적으로 모든 요청에 의존되는 URI 정보를 보여준다면 아래와 같은 장점이 있을 것이다.
+
+요청 URI정보가 변경되어도 클라이언트에서 동적으로 생성된 URI를 사용한다면, 클라이언트 입장에서는 URI 수정에 따른 코드 변경이 불필요하다.
+URI정보를 통해 의존되는 요청을 예측가능하게 한다. 
+기본 URI정보가 아니라 resource까지 포함된 URI를 보여주기 때문에 resource에 대한 확신을 갖게된다.
+REST 클라이언트는 간단한 고정 URL을 통해 REST 응용 프로그램에 들어갑니다 . 클라이언트가 취할 모든 향후 조치 는 서버에서 리턴 된 자원 표현 내에서 발견됩니다 . 
+
+예를 들어, [2] 이 GET 요청은 XML 표현으로 세부 사항을 요청하는 계정 자원을 가져옵니다.
+
+```language
+GET  / accounts / 12345  HTTP / 1.1 
+HOST :  bank.example.com 
+Accept :  application / xml 
+...
+```
+
+응답은 다음과 같습니다.
+```language
+HTTP / 1.1  200  OK 
+Content-Type :  application / xml 
+Content-Length :  ...
+
+<? xml version = "1.0"?> 
+<account> 
+    <account_number> 12345 </ account_number> 
+    <balance  currency = "usd" > 100.00 </ balance> 
+    <link  rel = "deposit"  href = "https : // bank.  href = "https://bank.example.com/accounts/12345/deposit " /> 
+    <link  rel = "withdraw"  href = "https://bank.example.com/accounts/12345/withdraw"  />  
+    <link  rel = "transfer"  href = " https://bank.example.com/accounts/12345/transfer "  /> 
+    <link  rel = "close"  href = "https://bank.example.com/accounts/12345/status "  />
+</ account>
+
+```
+
+응답에는 가능한 예금, 인출 또는 이체 또는 계정 폐쇄와 같은 가능한 후속 링크가 포함됩니다.
+계정 정보가 나중에 검색되면 계정이 초과 저장됩니다.
+```language
+HTTP / 1.1  200  OK 
+Content-Type: application/xml
+Content-Length: ...
+
+<? xml version = "1.0"?> 
+<account> 
+    <account_number> 12345 </ account_number> 
+    <balance  currency = "usd" > -25.00 </ balance> 
+    <link  rel = "deposit"  href = "https : // bank .example.com / accounts / 12345 / deposit "  /> 
+</ account>
+```
+
+이제는 하나의 링크 만 사용할 수 있습니다. 더 많은 돈을 입금하십시오. 현재 상태 에서는 다른 링크를 사용할 수 없습니다. 따라서 응용 프로그램 상태의 엔진 이라는 용어 . 가능한 조치는 자원 상태가 다양 할 때마다 다릅니다.
+```language
+HTTP / 1.1  200  OK 
+Content-Type: application/xml
+Content-Length: ...
+
+<? xml version = "1.0"?> 
+<account> 
+    <account_number> 12345 </ account_number> 
+    <balance  currency = "usd" > -25.00 </ balance> 
+    <link  rel = "deposit"  href = "https : // bank .example.com / accounts / 12345 / deposit "  /> 
+</ account>
+
+
+```
+
+
+
 ---
-便利なツール
+
+便利なツール <br>
 JsonParser
 http://jsonparseronline.com/
