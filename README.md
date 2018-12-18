@@ -268,7 +268,7 @@ Body = {
 }
 ```
 
-※　extends Resource<Event> を使ったて実装しても同じ結果になる
+※　extends Resource<Event> を使って実装しても同じ結果になる
 Resourceの中でパラメータでもらったcontentに@JsonUnwrapped使っているため
 ```language
 public class EventResource extends Resource<Event> {
