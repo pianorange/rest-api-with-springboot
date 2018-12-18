@@ -80,6 +80,7 @@ public class EventController {
         //selfLinkBuilder.withSelfRel() は共通処理になりうる要素なのでeventResourceClass の中に実装
         //eventResource.add(selfLinkBuilder.withSelfRel());
         eventResource.add(selfLinkBuilder.withRel("update-event"));
+        eventResource.add(new Link("http://localhost:8080/docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(eventResource);
     }
 

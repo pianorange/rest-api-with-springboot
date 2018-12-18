@@ -276,6 +276,7 @@ public class EventControllerTests_SpringBootTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
+                .andExpect(jsonPath("_links.profile").exists())
                 .andDo(document("create-event",
                         links(
                              linkWithRel("self").description("link to self"),
@@ -356,14 +357,12 @@ public class EventControllerTests_SpringBootTest {
                 .andExpect(jsonPath("free").value(false))//処理に必要なparameter 以外は無視しているか
                 .andExpect(jsonPath("offline").value(true))//処理に必要なparameter 以外は無視しているか
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))//処理に必要なparameter 以外は無視しているか
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect(jsonPath("_links.update-event").exists())
                 .andDo(document("create-event",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-events").description("link to query events"),
-                                linkWithRel("update-event").description("link to update event")
+                                linkWithRel("update-event").description("link to update event"),
+                                linkWithRel("profile").description("link to profile")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -400,9 +399,10 @@ public class EventControllerTests_SpringBootTest {
                                 fieldWithPath("free").description("it tells if this event is free or not"),
                                 fieldWithPath("offline").description("it tells if this event is event or not"),
                                 fieldWithPath("eventStatus").description("event status"),
-                                fieldWithPath("_links.self.href").description("_links"),
-                                fieldWithPath("_links.query-events.href").description("_links"),
-                                fieldWithPath("_links.update-event.href").description("_links")
+                                fieldWithPath("_links.self.href").description("_links to self"),
+                                fieldWithPath("_links.query-events.href").description("_links to query-events"),
+                                fieldWithPath("_links.update-event.href").description("_links to update-event"),
+                                fieldWithPath("_links.profile.href").description("_links to profile")
                         )
                 ));
     }
