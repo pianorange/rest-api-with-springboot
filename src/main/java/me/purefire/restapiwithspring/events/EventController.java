@@ -77,7 +77,8 @@ public class EventController {
        // eventResource.add(new Link());
         eventResource.add(linkTo(EventController.class).withRel("query-events"));
         //Rel に含まれるURLはHTTP　METHODによって動作が決めれられるのでself,update-eventは同じLink
-        eventResource.add(selfLinkBuilder.withSelfRel());
+        //selfLinkBuilder.withSelfRel() は共通処理になりうる要素なのでeventResourceClass の中に実装
+        //eventResource.add(selfLinkBuilder.withSelfRel());
         eventResource.add(selfLinkBuilder.withRel("update-event"));
         return ResponseEntity.created(createdUri).body(eventResource);
     }

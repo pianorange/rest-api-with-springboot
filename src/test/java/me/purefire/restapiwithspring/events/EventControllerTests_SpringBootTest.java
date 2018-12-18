@@ -2,13 +2,16 @@ package me.purefire.restapiwithspring.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.purefire.restapiwithspring.common.ErrorsSerializer;
+import me.purefire.restapiwithspring.common.RestDocsConfiguration;
 import me.purefire.restapiwithspring.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,6 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -24,6 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureRestDocs
+@Import(RestDocsConfiguration.class)
 public class EventControllerTests_SpringBootTest {
 
     //@SpringBootTest 디폴트 변수중 webEnvironment() default SpringBootTest.WebEnvironment.MOCK;
@@ -250,7 +260,136 @@ public class EventControllerTests_SpringBootTest {
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))//処理に必要なparameter 以外は無視しているか
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect(jsonPath("_links.update-event").exists());
+                .andExpect(jsonPath("_links.update-event").exists())
+                .andDo(document("create-event",
+                        links(
+                             linkWithRel("self").description("link to self"),
+                             linkWithRel("query-events").description("link to query events"),
+                             linkWithRel("update-event").description("link to update event")
+                        ),
+                        requestHeaders(
+                             headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                             headerWithName(HttpHeaders.CONTENT_TYPE).description("content type")
+                        ),
+                        requestFields(
+                             fieldWithPath("name").description("name of new event"),
+                             fieldWithPath("description").description("description of new event"),
+                             fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment"),
+                             fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment"),
+                             fieldWithPath("beginEventDateTime").description("date time of begin event"),
+                             fieldWithPath("endEventDateTime").description("date time of end event"),
+                             fieldWithPath("location").description("location of event"),
+                             fieldWithPath("basePrice").description("basePrice of event"),
+                             fieldWithPath("maxPrice").description("maxPrice of event"),
+                             fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+                        ),
+                        responseHeaders(
+                             headerWithName(HttpHeaders.LOCATION).description("Location Header"),
+                             headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type")
+                        ),
+                        //in this case not include _links{ ] So Caused SnippetException
+                        //org.springframework.restdocs.snippet.SnippetException: The following parts of the payload were not documented:
+                        //resresponseFields() <- must include all response field
+                        relaxedResponseFields(
+                                fieldWithPath("id").description("id of event"),
+                                fieldWithPath("name").description("name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment"),
+                                fieldWithPath("beginEventDateTime").description("date time of begin event"),
+                                fieldWithPath("endEventDateTime").description("date time of end event"),
+                                fieldWithPath("location").description("location of event"),
+                                fieldWithPath("basePrice").description("basePrice of event"),
+                                fieldWithPath("maxPrice").description("maxPrice of event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of enrollment"),
+                                fieldWithPath("free").description("it tells if this event is free or not"),
+                                fieldWithPath("offline").description("it tells if this event is event or not"),
+                                fieldWithPath("eventStatus").description("event status")
+                        )
+                ));
+    }
+
+    @Test
+    @TestDescription("정상적인 테스트")
+    public void createEventForResponseFields() throws Exception {
+
+        EventDto event = EventDto.builder()
+                .name("Spring")
+                .description("REST API Development")
+                .beginEnrollmentDateTime(LocalDateTime.of(2018,11,10,12,10))
+                .closeEnrollmentDateTime(LocalDateTime.of(2018,11,10,14,10))
+                .beginEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .endEventDateTime(LocalDateTime.of(2018,11,11,12,10))
+                .basePrice(10)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("tokyo sibuya")
+                .build();
+
+        System.out.printf(objectMapper.writeValueAsString(event));
+
+        mockMvc.perform(post("/api/events/")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(event))
+        )
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE,"application/hal+json;charset=UTF-8"))
+                .andExpect(jsonPath("free").value(false))//処理に必要なparameter 以外は無視しているか
+                .andExpect(jsonPath("offline").value(true))//処理に必要なparameter 以外は無視しているか
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))//処理に必要なparameter 以外は無視しているか
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
+                .andDo(document("create-event",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("query-events").description("link to query events"),
+                                linkWithRel("update-event").description("link to update event")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type")
+                        ),
+                        requestFields(
+                                fieldWithPath("name").description("name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment"),
+                                fieldWithPath("beginEventDateTime").description("date time of begin event"),
+                                fieldWithPath("endEventDateTime").description("date time of end event"),
+                                fieldWithPath("location").description("location of event"),
+                                fieldWithPath("basePrice").description("basePrice of event"),
+                                fieldWithPath("maxPrice").description("maxPrice of event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of enrollment")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION).description("Location Header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("id of event"),
+                                fieldWithPath("name").description("name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment"),
+                                fieldWithPath("beginEventDateTime").description("date time of begin event"),
+                                fieldWithPath("endEventDateTime").description("date time of end event"),
+                                fieldWithPath("location").description("location of event"),
+                                fieldWithPath("basePrice").description("basePrice of event"),
+                                fieldWithPath("maxPrice").description("maxPrice of event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of enrollment"),
+                                fieldWithPath("free").description("it tells if this event is free or not"),
+                                fieldWithPath("offline").description("it tells if this event is event or not"),
+                                fieldWithPath("eventStatus").description("event status"),
+                                fieldWithPath("_links.self.href").description("_links"),
+                                fieldWithPath("_links.query-events.href").description("_links"),
+                                fieldWithPath("_links.update-event.href").description("_links")
+                        )
+                ));
     }
 }
 
