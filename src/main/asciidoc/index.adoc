@@ -1,5 +1,4 @@
 = REST API Guide
-백기선;
 :doctype: book
 :icons: font
 :source-highlighter: highlightjs
