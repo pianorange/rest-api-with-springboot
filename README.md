@@ -279,9 +279,69 @@ public class EventResource extends Resource<Event> {
 }
 ```
 
+###### docker command 
+
+```
+
+$ docker --version
+Docker version 18.03.0-ce, build 0520e24302
+
+$ docker version
+Client:
+ Version:       18.03.0-ce
+ API version:   1.37
+ Go version:    go1.9.4
+ Git commit:    0520e24302
+ Built: Fri Mar 23 08:31:36 2018
+ OS/Arch:       windows/amd64
+ Experimental:  false
+ Orchestrator:  swarm
+
+Server: Docker Engine - Community
+ Engine:
+  Version:      18.09.0
+  API version:  1.39 (minimum version 1.12)
+  Go version:   go1.10.4
+  Git commit:   4d60db4
+  Built:        Wed Nov  7 00:52:55 2018
+  OS/Arch:      linux/amd64
+  Experimental: false
+
+$ docker info
+Containers: 0
+ Running: 0
+ Paused: 0
+ Stopped: 0
+Images: 0
+Server Version: 18.09.0
+
+$ docker run hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+d1725b59e92d: Pull complete
+Digest: sha256:0add3ace90ecb4adbf7777e9aacf18357296e799f81cabc9fde470971e499788
+Status: Downloaded newer image for hello-world:latest
+
+$ docker image ls
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello-world         latest              4ab4c602aa5e        3 months ago        1.84kB
+
+//List the hello-world container (spawned by the image) which exits after displaying its message. If it were still running, you would //not need the --all option:
+$ docker image ls --all
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello-world         latest              4ab4c602aa5e        3 months ago        1.84kB
+
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+
+```
 
 ---
 
 便利なツール <br>
 JsonParser
 http://jsonparseronline.com/
+
+参考
+https://docs.docker.com/v18.03/get-started/part2/#dockerfile
