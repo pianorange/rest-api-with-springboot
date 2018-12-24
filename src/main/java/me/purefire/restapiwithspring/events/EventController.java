@@ -1,5 +1,6 @@
 package me.purefire.restapiwithspring.events;
 
+import me.purefire.restapiwithspring.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -46,13 +47,13 @@ public class EventController {
             // body(errors) - > json return   X ( 그래서 ErrorsSerializer class 추가)
             //event는 JavaBeanSpec 준수 -> ObjectMapper사용　BeanSerializer 사용해서 Json변환
             //errors는 별도 ErrorsSerializer 구현 필요
-            return ResponseEntity.badRequest().body(errors);
+            return getBadRequestResponseEntity(errors);
         }
 
         eventValidator.validate(eventDto, errors);
 
         if (errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            return getBadRequestResponseEntity(errors);
         }
 
         /*
@@ -82,6 +83,10 @@ public class EventController {
         eventResource.add(selfLinkBuilder.withRel("update-event"));
         eventResource.add(new Link("http://localhost:8080/docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(eventResource);
+    }
+
+    private ResponseEntity getBadRequestResponseEntity(Errors errors) {
+        return ResponseEntity.badRequest().body(new ErrorsResource(errors));
     }
 
 }

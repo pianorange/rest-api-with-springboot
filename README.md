@@ -525,6 +525,18 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 ```
 
+
+#### JEP 286: Local-Variable Type Inference
+Java 10의 변화 중 코드 측면에서 가장 흥미로운 점을 하나 고르라면 당연 Local Variable Type Inference 입니다. 로컬변수 선언을 var 를 이용하여 기존의 엄격한 타입 선언 방식에서 탈피하여 컴파일러에게 타입을 추론하게할 수 있습니다. 기존에 lombok에서 제공하는 val/var 기능을 사용하고 계셨다면 크게 생소하진 않을 내용입니다.
+```
+var list = new ArrayList<String>();  // infers ArrayList<String>
+var stream = list.stream();          // infers Stream<String>
+```
+Local Variable Type Inference는 다음과 같은 상황에서만 사용할 수 있습니다.
+
+> - 초기화된 로컬 변수 선언 시 <br>
+> - 반복문에서 지역변수 선언 시 (enhanced for loop 포함)
+
 ---
 
 便利なツール <br>
