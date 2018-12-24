@@ -278,10 +278,258 @@ public class EventResource extends Resource<Event> {
     }
 }
 ```
+###### spring Docs
+SpringRESTDocs swagger 와 차이점
 
+로직이 바뀌어서 태스트코드가 바뀌면
+문서도 자동으로 함께 바뀌게 설정 가능. 
+
+```language
+[source,http,options="nowrap"]
+----
+HTTP/1.1 201 Created
+Location: http://localhost:8080/api/events/1
+Content-Length: 603
+Content-Type: application/hal+json;charset=UTF-8
+
+{"id":1,"name":"Spring","description":"REST API Development","beginEnrollmentDateTime":"2018-11-10T12:10:00","closeEnrollmentDateTime":"2018-11-10T14:10:00","beginEventDateTime":"2018-11-11T12:10:00","endEventDateTime":"2018-11-11T12:10:00","location":"tokyo sibuya","basePrice":10,"maxPrice":200,"limitOfEnrollment":100,"offline":true,"free":false,"eventStatus":"DRAFT","_links":{"self":[{"href":"http://localhost:8080/api/events/1"},{"href":"http://localhost:8080/api/events/1"}],"query-events":{"href":"http://localhost:8080/api/events"},"update-event":{"href":"http://localhost:8080/api/events/1"}}}
+----
+
+```
+
+커스터마이징 컨피그 클래스 만들어서 RestDocs의 문서를 포맷팅할수있다.
+RestDocsMockMvcConfigurationCustomizer 
+
+```language
+[source,http,options="nowrap"]
+----
+HTTP/1.1 201 Created
+Content-Length: 790
+Location: http://localhost:8080/api/events/1
+Content-Type: application/hal+json;charset=UTF-8
+
+{
+  "id" : 1,
+  "name" : "Spring",
+  "description" : "REST API Development",
+  "beginEnrollmentDateTime" : "2018-11-10T12:10:00",
+  "closeEnrollmentDateTime" : "2018-11-10T14:10:00",
+  "beginEventDateTime" : "2018-11-11T12:10:00",
+  "endEventDateTime" : "2018-11-11T12:10:00",
+  "location" : "tokyo sibuya",
+  "basePrice" : 10,
+  "maxPrice" : 200,
+  "limitOfEnrollment" : 100,
+  "offline" : true,
+  "free" : false,
+  "eventStatus" : "DRAFT",
+  "_links" : {
+    "self" : [ {
+      "href" : "http://localhost:8080/api/events/1"
+    }, {
+      "href" : "http://localhost:8080/api/events/1"
+    } ],
+    "query-events" : {
+      "href" : "http://localhost:8080/api/events"
+    },
+    "update-event" : {
+      "href" : "http://localhost:8080/api/events/1"
+    }
+  }
+}
+----
+
+```
+
+
+테스트할것
+- API문서 만들기
+  -요청 본문 문서화 requestFields() + fieldWithPath() 
+  -응답 본문 문서화responseFields() + fieldWithPath()
+  -링크 문서화links() + linkWithRel()
+      -self
+      -query-events
+      -update-event
+      -profile 링크 추가
+      
+  -요청 헤더 문서화requestHeaders() + headerWithName() 
+  -요청 필드 문서화
+  -응답 헤더 문서화responseHedaers() + headerWithName()
+  -응답 필드 문서화 
+  
+```language
+    //in this case not include _links{ ] So Caused SnippetException
+
+       //org.springframework.restdocs.snippet.SnippetException: The following parts of the payload were not documented:
+
+       //resresponseFields() <- must include all response field
+
+       relaxedResponseFields(
+
+               fieldWithPath("id").description("id of event"),
+
+               fieldWithPath("name").description("name of new event"),
+
+               fieldWithPath("description").description("description of new event"),
+
+               fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment"),
+
+               fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment"),
+
+               fieldWithPath("beginEventDateTime").description("date time of begin event"),
+
+               fieldWithPath("endEventDateTime").description("date time of end event"),
+	
+)
+```
+   					
+Relaxed 접두어 
+장점: 문서 일부분만 테스트 할 수 있다. 
+단점: 정확한 문서를 생성하지 못한다
+⇒APIの実装が変更された時にCodeの変化に合わせてRESTDOCKSにも反映されるので
+使わないですべてのFieldを記述したほうがいい
+
+```language
+	<!--asciidoctor 使ってHTML生成-->
+			<!--process-asciidoc設定はデフォルトでsrc/main/asciidoc 配下のすべての文書をHTML変換-->
+			<!--格納先　target/generated-docs/index.html-->
+			<plugin>
+				<groupId>org.asciidoctor</groupId>
+				<artifactId>asciidoctor-maven-plugin</artifactId>
+				<version>1.5.3</version>
+				<executions>
+					<execution>
+						<id>generate-docs</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>process-asciidoc</goal>
+						</goals>
+						<configuration>
+							<backend>html</backend>
+							<doctype>book</doctype>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.springframework.restdocs</groupId>
+						<artifactId>spring-restdocs-asciidoctor</artifactId>
+						<version>2.0.2.RELEASE</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<!--copy-resources設定　target/generated-docs/index.htmlに生成されたResourceをtarge/static配下に格納してくれる-->
+			<!--asciidoctorと同じ　<phase>prepare-package</phase>　なので順序が重要　生成して、コピーする流れで設定した格納先にコピーする-->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.7</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>
+								${project.build.outputDirectory}/static/docs
+							</outputDirectory>
+							<resources>
+								<resource>
+									<directory>
+										${project.build.directory}/generated-docs
+									</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+```
+			
+ asciidoc 追加後、
+ 
+mvn package 
+-> target/generated-docs/index.html
+生成されたことを確認して、ファイル情報のPathをコピーし、ブラウザで
+開いてみるとRESTDOCK文書が生成されていることが確認できる。
+
+※このように生成されたRESTAPIDocksをResponseに含めるとRestfulのSelfdescriptive原則を
+満たせることができる。
+
+        eventResource.add(new Link("http://localhost:8080/docs/index.html#resources-events-create").withRel("profile"));
+
+SpringBoot起動させると、targe/ static/docs配下に格納されているので
+以下のパスで確認できる。 
+http://localhost:8080/docs/index.html
+
+※ここで言っているstaticフォルダはresoucese配下ではなくてビルドされたディレクトリの配下である
+
+
+###### docker command 
+
+```
+
+$ docker --version
+Docker version 18.03.0-ce, build 0520e24302
+
+$ docker version
+Client:
+ Version:       18.03.0-ce
+ API version:   1.37
+ Go version:    go1.9.4
+ Git commit:    0520e24302
+ Built: Fri Mar 23 08:31:36 2018
+ OS/Arch:       windows/amd64
+ Experimental:  false
+ Orchestrator:  swarm
+
+Server: Docker Engine - Community
+ Engine:
+  Version:      18.09.0
+  API version:  1.39 (minimum version 1.12)
+  Go version:   go1.10.4
+  Git commit:   4d60db4
+  Built:        Wed Nov  7 00:52:55 2018
+  OS/Arch:      linux/amd64
+  Experimental: false
+
+$ docker info
+Containers: 0
+ Running: 0
+ Paused: 0
+ Stopped: 0
+Images: 0
+Server Version: 18.09.0
+
+$ docker run hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+d1725b59e92d: Pull complete
+Digest: sha256:0add3ace90ecb4adbf7777e9aacf18357296e799f81cabc9fde470971e499788
+Status: Downloaded newer image for hello-world:latest
+
+$ docker image ls
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello-world         latest              4ab4c602aa5e        3 months ago        1.84kB
+
+//List the hello-world container (spawned by the image) which exits after displaying its message. If it were still running, you would //not need the --all option:
+$ docker image ls --all
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello-world         latest              4ab4c602aa5e        3 months ago        1.84kB
+
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
+
+```
 
 ---
 
 便利なツール <br>
 JsonParser
 http://jsonparseronline.com/
+
+参考
+https://docs.docker.com/v18.03/get-started/part2/#dockerfile
