@@ -20,12 +20,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -59,6 +61,9 @@ public class EventControllerTests_SpringBootTest {
 
     @Autowired
     ErrorsSerializer errorsSerializer;
+
+    @Autowired
+    EventRepository eventRepository;
 
 
     //Repository 가져다 쓰려고하면 Web관련 빈만 생성되기 때문에 exception 발생 Mock 만들어 stubbing해줘야 함
@@ -204,9 +209,9 @@ public class EventControllerTests_SpringBootTest {
                 .content(this.objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].objectName").exists())
-                .andExpect(jsonPath("$[0].defaultMessage").exists())
-                .andExpect(jsonPath("$[0].code").exists());
+                .andExpect(jsonPath("content[0].objectName").exists())
+                .andExpect(jsonPath("content[0].defaultMessage").exists())
+                .andExpect(jsonPath("content[0].code").exists());
     }
 
     @Test
@@ -283,7 +288,8 @@ public class EventControllerTests_SpringBootTest {
                         links(
                              linkWithRel("self").description("link to self"),
                              linkWithRel("query-events").description("link to query events"),
-                             linkWithRel("update-event").description("link to update event")
+                             linkWithRel("update-event").description("link to update event"),
+                             linkWithRel("profile").description("link to profile")
                         ),
                         requestHeaders(
                              headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -408,5 +414,53 @@ public class EventControllerTests_SpringBootTest {
                         )
                 ));
     }
+
+    @Test
+    @TestDescription("30개의 이벤트 10개씩 두번째 페이지 조회하기")
+    public void queryEvents() throws Exception {
+        //Given
+        IntStream.range(0, 30).forEach(i -> {
+            this.generateEvent(i);
+        });
+
+       //When
+       this.mockMvc.perform(get("/api/events")
+                            .param("page", "1")
+                            .param("size", "10")
+                            .param("sort", "name,DESC")
+       )
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andExpect(jsonPath("page").exists())
+                            .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                            .andExpect(jsonPath("_links.self").exists())
+                            .andExpect(jsonPath("_links.profile").exists())
+                            .andDo(document("query-events",
+                                    links(
+                                            linkWithRel("first").description("link to First page"),
+                                            linkWithRel("prev").description("link to prev page"),
+                                            linkWithRel("next").description("link to next page"),
+                                            linkWithRel("self").description("link to this page"),
+                                            linkWithRel("last").description("link to last page"),
+                                            linkWithRel("profile").description("link to profile")
+                                    ),relaxedResponseFields(
+                                            fieldWithPath("page").description("start with 0, it has paging information"),
+                                            fieldWithPath("page.size").description("size of per page"),
+                                            fieldWithPath("page.totalElements").description("all records count "),
+                                            fieldWithPath("page.totalPages").description("all pages count "),
+                                            fieldWithPath("page.number").description("page number. number start with 0")
+                                    )));
+
+    }
+
+    private void generateEvent(int index) {
+        Event event = Event.builder()
+                .name("Event" + index)
+                .description("test Event" + index)
+                .build();
+        this.eventRepository.save(event);
+    }
+
+
 }
 

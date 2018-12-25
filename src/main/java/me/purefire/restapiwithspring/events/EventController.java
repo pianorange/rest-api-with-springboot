@@ -2,12 +2,16 @@ package me.purefire.restapiwithspring.events;
 
 import me.purefire.restapiwithspring.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,6 +87,22 @@ public class EventController {
         eventResource.add(selfLinkBuilder.withRel("update-event"));
         eventResource.add(new Link("http://localhost:8080/docs/index.html#resources-events-create").withRel("profile"));
         return ResponseEntity.created(createdUri).body(eventResource);
+    }
+
+    /**
+     * Pageable : Abstract interface for pagination information.
+     * @param pageable pageable
+     * @return ResponseEntity result
+     */
+    @GetMapping
+    public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> eventPagedResourcesAssembler) {
+        Page<Event> page = this.eventRepository.findAll(pageable);
+        //repository 에서 받아온 page를 리소스로 변경(페이지에 관련된 링크도 같이 생성해줌 ex ) prev, next, last, first 등)
+        //var pageResources = eventPagedResourcesAssembler.toResource(page);
+        //but 한건에 대한 링크가 포함 되지 않으므로 완벽한 haiteos 가 아님
+        var pageResources = eventPagedResourcesAssembler.toResource(page, e -> new EventResource(e));
+        pageResources.add(new Link("http://localhost:8080/docs/index.html#resources-events-list").withRel("profile"));
+        return ResponseEntity.ok(pageResources);
     }
 
     private ResponseEntity getBadRequestResponseEntity(Errors errors) {
