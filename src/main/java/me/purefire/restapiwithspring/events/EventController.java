@@ -117,6 +117,45 @@ public class EventController {
         return ResponseEntity.ok(eventResource);
     }
 
+    /**
+     *
+     * request 본문을 받으니까 @RequestBody
+     * EventDto validation 위해 @Valid
+     * eventValidator.validate(eventDto, errors); 형태로 hasErrors()체크가능
+     * error발생시 스프링이 errors에 담아줌
+     * @param id
+     * @param eventDto
+     * @return
+     */
+    @PutMapping("{id}")
+    public ResponseEntity updateEvent(@PathVariable Integer id,
+                                      @RequestBody @Valid EventDto eventDto,
+                                      Errors errors) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (errors.hasErrors()) {
+            return getBadRequestResponseEntity(errors);
+        }
+
+        this.eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()) {
+            return getBadRequestResponseEntity(errors);
+        }
+
+        Event existingEvent = optionalEvent.get();
+
+        //map (from , to ) parameter
+        this.modelMapper.map(eventDto, existingEvent);
+        Event updatedEvent = this.eventRepository.save(existingEvent);
+        EventResource eventResource = new EventResource(updatedEvent);
+        eventResource.add(new Link("http://localhost:8080/docs/index.html#resources-events-update").withRel("profile"));
+        return ResponseEntity.ok(eventResource);
+    }
+
     private ResponseEntity getBadRequestResponseEntity(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
     }
