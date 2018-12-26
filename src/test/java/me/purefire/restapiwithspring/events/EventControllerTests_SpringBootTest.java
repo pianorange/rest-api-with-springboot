@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
@@ -424,12 +425,13 @@ public class EventControllerTests_SpringBootTest {
         });
 
        //When
-       this.mockMvc.perform(get("/api/events")
+        ResultActions resultActions =  this.mockMvc.perform(get("/api/events")
                             .param("page", "1")
                             .param("size", "10")
                             .param("sort", "name,DESC")
-       )
-                            .andDo(print())
+        );
+        //Then
+                            resultActions.andDo(print())
                             .andExpect(status().isOk())
                             .andExpect(jsonPath("page").exists())
                             .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
@@ -453,12 +455,39 @@ public class EventControllerTests_SpringBootTest {
 
     }
 
-    private void generateEvent(int index) {
+    @Test
+    @TestDescription("기존의 이벤트 한개 조회하기")
+    public void getEvent() throws Exception {
+
+        //Given
+        Event event = this.generateEvent(100);
+
+        //When & Then
+        this.mockMvc.perform(get("/api/events/{id}", event.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("name").exists())
+                    .andExpect(jsonPath("id").exists())
+                    .andExpect(jsonPath("_links.self").exists())
+                    .andExpect(jsonPath("_links.profile").exists())
+                    .andDo(document("get-an-event"));
+    }
+
+    @Test
+    @TestDescription("없는 이벤트 조회시 404 응답받기")
+    public void getEvent404() throws Exception {
+
+        //When & Then
+        this.mockMvc.perform(get("/api/events/11111"))
+                    .andExpect(status().isNotFound());
+
+    }
+
+    private Event generateEvent(int index) {
         Event event = Event.builder()
                 .name("Event" + index)
                 .description("test Event" + index)
                 .build();
-        this.eventRepository.save(event);
+        return this.eventRepository.save(event);
     }
 
 
