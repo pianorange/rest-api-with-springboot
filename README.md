@@ -525,7 +525,6 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 ```
 
-
 #### JEP 286: Local-Variable Type Inference
 Java 10의 변화 중 코드 측면에서 가장 흥미로운 점을 하나 고르라면 당연 Local Variable Type Inference 입니다. 로컬변수 선언을 var 를 이용하여 기존의 엄격한 타입 선언 방식에서 탈피하여 컴파일러에게 타입을 추론하게할 수 있습니다. 기존에 lombok에서 제공하는 val/var 기능을 사용하고 계셨다면 크게 생소하진 않을 내용입니다.
 ```
@@ -536,6 +535,54 @@ Local Variable Type Inference는 다음과 같은 상황에서만 사용할 수 
 
 > - 초기화된 로컬 변수 선언 시 <br>
 > - 반복문에서 지역변수 선언 시 (enhanced for loop 포함)
+
+
+
+#### JPA 
+
+##### @ElementCollection 
+あるエンティティーTで別のエンティティーDを複数保持する（T:D＝1:n、すなわち1:多）場合、
+JPAではエンティティーTの中でDのコレクションを持つ形で書ける。
+- fetch=LAZY（遅延）:  実際のSQLとしても、最初のエンティティーの取得と、フィールドのデータの取得のSQLは別々に発行
+
+- fetch=EAGERにすると、エンティティーを取得した際に同時にフィールドのデータも取得される。
+    (実際のSQLとしても、joinを使った1つのSQLしか発行されない）
+
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<AccountRole> roles;
+
+
+#### Spring Security 
+
+ - web Security (Filter 기반 시큐리티): 웹 요청에 보안 인증
+ - method Security (AOP 생각하면됨 프록시 만들어서 접근제한): 웹과 상관 없이 어떤 메소드가 호출 됬을 때
+ - 양쪽 다 Security Interceptor 사용 (MethodSecurityInterceptor, FilterSecurityInterceptor) 
+   - 리소스에 접근 허용할 것이냐 말것이냐 결정하는 로직 들어있음
+
+Request  =>  ServletFilter 가로채서 => WebSecurityIntercepter인증 적용여부 확인 =>
+ => FilterSecurityInterceptor 
+   1. 인증정보 확인 위해 SecurityContextHolder에서 인증정보 꺼내려고 시도(기본 구현체 ThreadLocal(java.lang.ThreadLocal<T>). 한 쓰래드 내에서 공유하는 저장소 한쓰래드 내라면 다른 메소드에서 값 꺼내쓸 수 있다)
+   2. 값 유무에 따라 인증여부 확인하고 없으면 AuthenticationManager(로그인 담당), 있으면 AccessDecisionManager(권한 확인)  
+   - AuthenticationManager 로그인시 사용하는 주요한 interface UserDetailsService, PasswordEncoder
+     - 대표적 방법 BasicAuthentication : 인증 요청 헤더에  Authentication, Basic,username,password 합쳐서 인코딩한 문자열
+    UserDetailsService 이용해서 DB데이터가져오고 PasswordEncoder 로 password 일치여부 확인 
+   3. 로그인 성공했으면  SecurityContextHolder에 인증정보를 담는다.
+   4. 로그인 됬으므로 AccessDecisionManager가 권한 확인
+
+![springsecurity](./bin/springsecurity.png)
+
+##### Dependency
+ ```$xslt
+<dependency>
+    <groupId>org.springframework.security.oauth.boot</groupId>
+    <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+    <version>2.1.0.RELEASE</version>
+</dependency>
+
+```
+
 
 ---
 
