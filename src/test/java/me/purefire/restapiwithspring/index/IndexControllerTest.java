@@ -1,6 +1,7 @@
 package me.purefire.restapiwithspring.index;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.purefire.restapiwithspring.common.BaseControllerTest;
 import me.purefire.restapiwithspring.common.ErrorsSerializer;
 import me.purefire.restapiwithspring.common.RestDocsConfiguration;
 import me.purefire.restapiwithspring.common.TestDescription;
@@ -25,22 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs
-@Import(RestDocsConfiguration.class)
-@ActiveProfiles("test")
-public class IndexControllerTest {
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    ErrorsSerializer errorsSerializer;
-
-    @Autowired
-    MockMvc mockMvc;
+public class IndexControllerTest extends BaseControllerTest {
 
     @Test
     public void index() throws Exception{
@@ -80,7 +66,7 @@ public class IndexControllerTest {
                 .content(this.objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                //jsonarray に変換されている状態なのでResourceオブジェクトのUnWrrapedが適用されないためcontentの配下に結果が結果が含まれている。
+                //jsonarray に変換されている状態なのでResourceオブジェクトのUnWrrapedが適用されないためcontentの配下に結果が含まれている。
                 .andExpect(jsonPath("content[0].objectName").exists())
                 .andExpect(jsonPath("content[0].defaultMessage").exists())
                 .andExpect(jsonPath("content[0].code").exists())
